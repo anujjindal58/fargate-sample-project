@@ -126,8 +126,10 @@ fargate:
     securityGroupIds:
       - sg-9594bce4
     subnetIds:
-      - subnet-9e8669fa
-    assignPublicIp: true
+      - subnet-0bb391c4ee31e039d
+      # - subnet-9e8669fa
+      # - subnet-0bb391c4ee31e039d
+    # assignPublicIp: true
   tasks:
     report-data-aggregation-task:
       name: report-data-aggregation-task
