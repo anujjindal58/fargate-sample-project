@@ -166,8 +166,6 @@ fargate:
     #     - node 
     #     - createPdf.js
     #   schedule: 'rate(1 minute)'
-    
-    
     #
     scheduled-task:
       name: scheduled-task

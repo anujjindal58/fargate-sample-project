@@ -1,0 +1,9 @@
+Default
+docker run 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
+Script createPdf
+docker run 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest node createPdf.js
+Script sendZip
+docker run 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest node sendZip.js
+
+
+docker run jindalanuj/sqs-subscribe-image:latest node createPdf.js
