@@ -122,6 +122,9 @@ fargate:
     - Effect: Allow
       Action: "ecr:*"
       Resource: '*'
+    - Effect: Allow
+      Action: "sqs:*"
+      Resource: '*'
   vpc:
     securityGroupIds:
       - sg-9594bce4
