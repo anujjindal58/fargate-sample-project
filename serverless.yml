@@ -148,9 +148,34 @@ fargate:
         - node 
         - createPdf.js
       service:
-        desiredCount: 2
+        desiredCount: 1
       tags:
         service: tag
+    pollsqs-task:
+      name: pollsqs-task
+      image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
+      command:
+        - node 
+        - pollSQS.js
+      service:
+        desiredCount: 1
+    # report-create-task:
+    #   name: report-create-task
+    #   image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
+    #   command:
+    #     - node 
+    #     - createPdf.js
+    #   schedule: 'rate(1 minute)'
+    
+    
+    #
+    scheduled-task:
+      name: scheduled-task
+      image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
+      command:
+        - node 
+        - scheduledTask.js
+      schedule: 'rate(1 minute)'
     report-zip-task:
       name: report-zip-task
       image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
