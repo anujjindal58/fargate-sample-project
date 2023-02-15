@@ -1,0 +1,218 @@
+service: myService-fargate2
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stackTags:
+    name: aaaa
+  # ecr:
+  #   images:
+  #     sample-image2:
+  #       path: ./
+  #       file: Dockerfile
+      # jindalanuj/sqs-subscribe-image:latest
+
+plugins:
+  # - serverless-fargate-plugin
+  - serverless-fargate
+  # - serverless-fargate-tasks
+
+custom:
+  # serverless-fargate-tasks
+  # https://app.circleci.com/pipelines/github/myDario/bh-serverless-reporting-scripts/773/workflows/936c98af-b961-49d1-b774-7a8ae7c414f4/jobs/4274?invite=true#step-108-35
+  # fargate:
+  #   vpc:
+  #     public-ip: DISABLED  # optional
+  #   # vpc:
+  #   #   securityGroupIds: ${self:custom.settings.${self:custom.stage}.securityGroupIds, self:custom.settings.default.securityGroupIds}
+  #   #   subnetIds: ${self:custom.settings.${self:custom.stage}.subnetIds, self:custom.settings.default.subnetIds}
+  #   tasks:
+  #     my-task:
+  #       name: ${self:service}-dev-my-task # default name is be the object key (here 'my-task')
+  #       image: public.ecr.aws/y0r7b2y9/sample-docker-script-2022-02-09:1.0.1
+  # example configuration.
+  # fargate:
+  #   vpc:
+  #     cidr: 10.0.0.0/16
+  #     subnets:
+  #       - 10.0.0.0/24
+  #       - 10.0.1.0/24
+  #   services:
+  #     - name: node-basic-webserver
+  #       cpu: 512
+  #       memory: 1024
+  #       port: 8080
+  #       healthCheckUri: /
+  #       healthCheckInterval: 6
+  #       image: public.ecr.aws/y0r7b2y9/sample-docker-script-2022-02-09:1.0.1
+  #       entryPoint:
+  #         - npm
+  #         - run
+  #         - start
+  #       environment:
+  #         PRODUCTION: true
+  #       protocols:
+  #         - protocol: HTTP
+  # fargate:
+  #   - clusterName: Test
+  #     services:
+  #       - name: example-name
+  #         cpu: 512
+  #         memory: 1024
+  #         healthCheckInterval: 6
+  #         imageTag: 1.0.1
+  #         imageRepository: public.ecr.aws/y0r7b2y9/sample-docker-script-2022-02-09
+  #         autoScale:
+  #           min: 1
+  #           max: 10
+  #           cooldownIn: 30
+  #           cooldownOut: 60
+  #           metric: ECSServiceAverageCPUUtilization
+  #           targetValue: 75
+
+functions:
+  hello:
+    handler: handler.hello
+
+resources:
+  Resources:
+    GenerateReportQueue:
+      Type: 'AWS::SQS::Queue'
+      Properties:
+        QueueName: generateReportQueueName
+        KmsMasterKeyId: alias/aws/sqs
+        RedrivePolicy:
+          deadLetterTargetArn:
+            'Fn::GetAtt':
+              - GenerateReportDLQueue
+              - Arn
+          maxReceiveCount: 1
+        VisibilityTimeout: 600
+
+    GenerateReportDLQueue:
+      Type: 'AWS::SQS::Queue'
+      Properties:
+        QueueName: generateReportDLQueueName
+        KmsMasterKeyId: alias/aws/sqs
+
+    GenerateReportDLQueuePolicy:
+      Type: 'AWS::SQS::QueuePolicy'
+      Properties:
+        Queues:
+          - Ref: GenerateReportDLQueue
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: 'Allow'
+              Action: 'SQS:SendMessage'
+              Resource: { Fn::GetAtt: [GenerateReportDLQueue, 'Arn'] }
+
+fargate:
+  clusterName: reporting-cluster2
+  containerInsights: true
+  memory: '0.5GB'
+  cpu: 256
+  architecture: X86_64
+  environment:
+    name: value
+  logGroupName: reporting-cluster-log-group2
+  logRetentionInDays: 365
+  iamRoleStatements:
+    - Effect: Allow
+      Action: "ecr:*"
+      Resource: '*'
+  vpc:
+    securityGroupIds:
+      - sg-9594bce4
+    subnetIds:
+      - subnet-9e8669fa
+    assignPublicIp: true
+  tasks:
+    report-data-aggregation-task:
+      name: report-data-aggregation-task
+      image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
+      service:
+        desiredCount: 1
+      tags:
+        service: tag
+    report-create-task:
+      name: report-create-task
+      image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
+      command:
+        - node 
+        - createPdf.js
+      service:
+        desiredCount: 2
+      tags:
+        service: tag
+    report-zip-task:
+      name: report-zip-task
+      image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
+      command:
+        - node 
+        - sendZip.js
+      service:
+        desiredCount: 1
+      tags:
+        service: tag
+
+
+
+
+
+
+
+
+# service: example-service
+
+# provider:
+#   name: aws
+#   region: us-east-1
+#   stage: example
+
+# plugins:
+#   - serverless-fargate-plugin
+#   # - serverless-fargate
+#   # - serverless-fargate-tasks
+
+
+# custom:
+#   fargate:
+#     - clusterName: Test
+#       # vpc:
+#       #   cidr: 10.0.0.0/16
+#       #   subnets:
+#       #   - 10.0.0.0/24
+#       #   - 10.0.1.0/24
+#       # tags:
+#       #   customer: You
+#       #   owner: Me
+#       # disableELB: false
+#       services:
+#       - name: example-name
+#         cpu: 512
+#         memory: 1024
+#         port: 80
+#         # healthCheckUri: /health
+#         # healthCheckInterval: 6
+#         imageTag: 0.1.0
+#         imageRepository: jindalanuj/sqs-subscribe-image:0.1.0
+#         autoScale:
+#           min: 1
+#           max: 10
+#           cooldownIn: 30
+#           cooldownOut: 60
+#           metric: ECSServiceAverageCPUUtilization
+#           targetValue: 75
+#         # entryPoint:
+#         # - npm
+#         # - run
+#         # - start
+#         # environment:
+#         #   PRODUCTION: true
+#         # protocols:
+#         # - protocol: HTTP
+#         # - protocol: HTTPS
+#         #   certificateArns:
+#         #   - xxxx
