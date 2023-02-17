@@ -1,3 +1,3 @@
 const { runDaemon } = require("./utils/daemonThread");
 
-runDaemon();
+runDaemon(100);

@@ -1,4 +1,3 @@
-const { runDaemon } = require("./utils/daemonThread");
 const { runFargateTask } = require("./utils/runFargateTask");
 
 

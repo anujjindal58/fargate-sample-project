@@ -18,7 +18,7 @@ plugins:
   - serverless-fargate
   # - serverless-fargate-tasks
 
-custom:
+# custom:
   # serverless-fargate-tasks
   # https://app.circleci.com/pipelines/github/myDario/bh-serverless-reporting-scripts/773/workflows/936c98af-b961-49d1-b774-7a8ae7c414f4/jobs/4274?invite=true#step-108-35
   # fargate:
@@ -117,13 +117,15 @@ fargate:
   environment:
     name: value
   logGroupName: reporting-cluster-log-group2
-  logRetentionInDays: 365
   iamRoleStatements:
     - Effect: Allow
       Action: "ecr:*"
       Resource: '*'
     - Effect: Allow
       Action: "sqs:*"
+      Resource: '*'
+    - Effect: Allow
+      Action: "ecs:RunTask"
       Resource: '*'
   vpc:
     securityGroupIds:
@@ -137,34 +139,53 @@ fargate:
     report-data-aggregation-task:
       name: report-data-aggregation-task
       image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
+      command:
+        - node 
+        - dataAggregation.js
       # TODO: change this schedule to 4 hours.
-      schedule: 'rate(1 minute)'
+     # schedule: 'rate(1 minute)'
+      schedule: 'rate(2 minutes)'
     # TODO: need polling and scaling
+    # NOTE: Poll for x messages and only stop when there is no messages left in kinesis.
     report-create-task:
       name: report-create-task
       image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
-      command:
-        - node 
-        - createPdf.js
       service:
-        desiredCount: 1
-      tags:
-        service: tag
+        desiredCount: 0
     report-zip-task:
       name: report-zip-task
       image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
       command:
         - node 
         - sendZip.js
-      schedule: 'rate(1 minute)'
-    pollsqs-task:
-      name: pollsqs-task
-      image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
-      command:
-        - node 
-        - pollSQS.js
-      service:
-        desiredCount: 1
+      # TODO: change this schedule to 4 hours. (Run this task for 1 hour)
+      # schedule: 'rate(1 minute)'
+      schedule: 'rate(57 minutes)'
+
+
+
+
+
+    # Experimental tasks
+    # zero-sized-count:
+    #   name: zero-sized-count
+    #   image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
+    #   command:
+    #     - node 
+    #     - sendZip.js
+    #     - zero-sized-count
+    #     - 10
+    #   service:
+    #     desiredCount: 0
+    
+    # pollsqs-task:
+    #   name: pollsqs-task
+    #   image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
+    #   command:
+    #     - node 
+    #     - pollSQS.js
+    #   service:
+    #     desiredCount: 0
     # NOTE: currently run every 1 minute and shut down every 30 seconds
     # Experimental scheduled task
     # scheduled-task:

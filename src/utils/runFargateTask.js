@@ -7,8 +7,8 @@ const fargate = new AWS.ECS({ region: 'us-east-1' });
 var overrides = {
     "containerOverrides": [
         {
-            "name": "zero-desized-count",
-            "command": ["node", "createPdf.js", 'runTaskECS', "1"],
+            "name": "",
+            "command": [],
             "environment": [
                 {
                     "name": "ecsEnvName",
@@ -20,8 +20,8 @@ var overrides = {
 }
 
 var params = {
-    cluster: "reporting-cluster2",
-    taskDefinition: "zero-desized-count",
+    cluster: "",
+    taskDefinition: "",
     launchType: 'FARGATE',
     count: 10,
     networkConfiguration: {
