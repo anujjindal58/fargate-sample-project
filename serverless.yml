@@ -165,31 +165,19 @@ fargate:
         - pollSQS.js
       service:
         desiredCount: 1
-    # report-create-task:
-    #   name: report-create-task
+    # NOTE: currently run every 1 minute and shut down every 30 seconds
+    # Experimental scheduled task
+    # scheduled-task:
+    #   name: scheduled-task
     #   image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
+    #   # node scheduledTask.js scheduled-task 30
     #   command:
     #     - node 
-    #     - createPdf.js
+    #     - scheduledTask.js 
+    #     - scheduled-task
+    #     - 10
     #   schedule: 'rate(1 minute)'
-    #
-    scheduled-task:
-      name: scheduled-task
-      image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
-      command:
-        - node 
-        - scheduledTask.js
-      schedule: 'rate(1 minute)'
-    report-zip-task:
-      name: report-zip-task
-      image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
-      command:
-        - node 
-        - sendZip.js
-      service:
-        desiredCount: 1
-      tags:
-        service: tag
+    
 
 
 
