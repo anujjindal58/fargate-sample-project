@@ -125,7 +125,10 @@ fargate:
       Action: "sqs:*"
       Resource: '*'
     - Effect: Allow
-      Action: "ecs:RunTask"
+      Action: "ecs:*"
+      Resource: '*'
+    - Effect: Allow
+      Action: "iam:PassRole"
       Resource: '*'
   vpc:
     securityGroupIds:
@@ -138,23 +141,23 @@ fargate:
   tasks:
     report-data-aggregation-task:
       name: report-data-aggregation-task
-      image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
+      image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:1.0.3
       command:
         - node 
         - dataAggregation.js
       # TODO: change this schedule to 4 hours.
-     # schedule: 'rate(1 minute)'
-      schedule: 'rate(2 minutes)'
+      schedule: 'rate(1 minute)'
+      # schedule: 'rate(2 minutes)'
     # TODO: need polling and scaling
     # NOTE: Poll for x messages and only stop when there is no messages left in kinesis.
     report-create-task:
       name: report-create-task
-      image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
+      image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:1.0.3
       service:
         desiredCount: 0
     report-zip-task:
       name: report-zip-task
-      image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:latest
+      image: 908224992569.dkr.ecr.us-east-1.amazonaws.com/sample-docker-script-2022-02-09:1.0.3
       command:
         - node 
         - sendZip.js
